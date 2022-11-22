@@ -5,6 +5,8 @@ using UnityEngine.UI;
 using System.IO;
 using TMPro;
 using DG.Tweening;
+using Cysharp.Threading.Tasks;
+using System;
 
 public class GameController : MonoBehaviour
 {
@@ -14,8 +16,6 @@ public class GameController : MonoBehaviour
     public GameObject popup;
     public TextAsset textFile;
     public CanvasGroup canvasGr;
-
-    private Coroutine popupRoutine;
 
     //
     // Our different colors that we use
@@ -74,7 +74,7 @@ public class GameController : MonoBehaviour
 
     string GetRandomWord()
     {
-        string randomWord = guessingWords[Random.Range(0, guessingWords.Count)];
+        string randomWord = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
         Debug.Log(randomWord);
         return randomWord;
     }
@@ -209,7 +209,7 @@ public class GameController : MonoBehaviour
 
         // Output the guess to the console
         Debug.Log("Player guess:" + guess);
-        StartCoroutine(CheckWord(guess));
+        CheckWord(guess);
         // If the guess was correct, output that the player has won into the console
     }
 
@@ -250,7 +250,7 @@ public class GameController : MonoBehaviour
         AnimateWordBox(wordBoxes[currentlySelectedWordbox]);
     }
 
-    IEnumerator CheckWord(string guess)
+    async void CheckWord(string guess)
     {
         // Set up variables
         char[] playerGuessArray = guess.ToCharArray();
@@ -342,9 +342,6 @@ public class GameController : MonoBehaviour
                 .GetChild(0)
                 .GetComponent<TextMeshProUGUI>();
 
-            // Our timer animation started
-            float timer = 0f;
-
             // Duration of the animation
             float duration = 0.15f;
 
@@ -374,7 +371,8 @@ public class GameController : MonoBehaviour
             */
             //New anim:
             currentWordboxImage.transform.DOScale(Vector3.zero, duration);
-            yield return new WaitForSeconds(duration);
+            await UniTask.Delay(millisecondsDelay:150);
+            
             // Set the scale again if we overshoot end anim 1
             currentWordboxImage.transform.localScale = Vector3.zero;
 
@@ -385,9 +383,6 @@ public class GameController : MonoBehaviour
             currentWordboxImage.color = newColor;
             currentWordboxColor.color = newTextColor;
             Debug.Log("New text color= " + currentWordboxColor);
-
-            // Reset the timer
-            timer = 0f;
 
             /* Old anim:
 
@@ -412,7 +407,8 @@ public class GameController : MonoBehaviour
             //New Anim:
 
             currentWordboxImage.transform.DOScale(Vector3.one, duration);
-            yield return new WaitForSeconds(duration);
+            await UniTask.Delay(millisecondsDelay:150);
+            
 
             // Set the scale again if we overshoot end anim 2
             //currentWordboxImage.transform.localScale = Vector3.one;
@@ -469,23 +465,10 @@ public class GameController : MonoBehaviour
                 0f,
                 true
             );
-            yield return null;
         }
     }
 
-    void ShowPopup(string message, float duration, bool stayForever)
-    {
-        // If a popup routine exists, we should stop that first,
-        // this makes sure that not 2 coroutines can run at the same time.
-        // Since we are using the same popup for every message, we only want one of these coroutines to run at any time
-        if (popupRoutine != null)
-        {
-            StopCoroutine(popupRoutine);
-        }
-        popupRoutine = StartCoroutine(ShowPopupRoutine(message, duration, stayForever));
-    }
-
-    IEnumerator ShowPopupRoutine(string message, float duration, bool stayForever = false)
+    async void ShowPopup(string message, float duration, bool stayForever = false)
     {
         // Set the message of the popup
         popup.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message;
@@ -499,21 +482,20 @@ public class GameController : MonoBehaviour
         {
             while (true)
             {
-                yield return null;
+                await UniTask.Delay(millisecondsDelay:150);
+               
             }
         }
         // Wait for the duration time
-        yield return new WaitForSeconds(duration);
+        await UniTask.Delay(millisecondsDelay:500);
+        
         // Deactivate the popup
 
         canvasGr.DOFade(0, 0.5f);
     }
 
-    IEnumerator AnimateWordboxRoutine(Transform wordboxToAnimate)
+    async void AnimateWordBox(Transform wordboxToAnimate)
     {
-        // Our timer
-        float timer = 0f;
-
         // Duration of the animation
         float duration = 0.15f;
 
@@ -525,35 +507,19 @@ public class GameController : MonoBehaviour
 
         // Set the wordbox-scale to the starting scale, in case we're entering in the middle of another transition
         wordboxToAnimate.localScale = Vector3.one;
+        
+        wordboxToAnimate.transform.DOScale(scaledUp, duration);
+        await UniTask.Delay(millisecondsDelay:150);
+        
 
-        // Loop for the time of the duration
-        while (timer <= duration)
-        {
-            // This will go from 0 to 1 during the time of the duration
-            float value = timer / duration;
-
-            // LerpUnclamped will return a value above 1 and below 0, regular Lerp will clamp the value at 1 and 0
-            // To have more freedom when animating, LerpUnclamped can be used instead
-            wordboxToAnimate.localScale = Vector3.LerpUnclamped(
-                startScale,
-                scaledUp,
-                wordBoxInteractionCurve.Evaluate(value)
-            );
-
-            // Increase the timer by the delta time
-            timer += Time.deltaTime;
-            yield return null;
-        }
+        wordboxToAnimate.transform.DOScale(startScale, duration);
+        await UniTask.Delay(millisecondsDelay:150);
+        
 
         // Since we're checking if the timer is smaller and/or equals to the duration in the loop above,
         // the value might go above 1 which would give the wordbox a scale that is not equals to the desired scale.
         // To prevent slightly scaled wordboxes, we set the scale of the wordbox to the startscale
         wordboxToAnimate.localScale = startScale;
-    }
-
-    void AnimateWordBox(Transform wordboxToAnimate)
-    {
-        StartCoroutine(AnimateWordboxRoutine(wordboxToAnimate));
     }
 
     public void ExitGame()
