@@ -8,6 +8,7 @@ using DG.Tweening;
 using Cysharp.Threading.Tasks;
 using System;
 
+
 public class GameController : MonoBehaviour
 {
     // Curve for animating the wordboxes
