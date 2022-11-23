@@ -98,7 +98,7 @@ public class GameController : MonoBehaviour
                 .GetChild(0)
                 .GetComponent<TextMeshProUGUI>()
                 .text = letter;
-            AnimateWordBox(wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]);
+           AnimateWordBox(wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]);
         }
 
         if (
@@ -250,7 +250,7 @@ public class GameController : MonoBehaviour
         AnimateWordBox(wordBoxes[currentlySelectedWordbox]);
     }
 
-    async void CheckWord(string guess)
+    async UniTaskVoid CheckWord(string guess)
     {
         // Set up variables
         char[] playerGuessArray = guess.ToCharArray();
@@ -371,8 +371,8 @@ public class GameController : MonoBehaviour
             */
             //New anim:
             currentWordboxImage.transform.DOScale(Vector3.zero, duration);
-            await UniTask.Delay(millisecondsDelay:150);
-            
+            //await UniTask.Delay(millisecondsDelay:150);
+            await UniTask.WaitUntil(() => (currentWordboxImage.transform.localScale == Vector3.zero));
             // Set the scale again if we overshoot end anim 1
             currentWordboxImage.transform.localScale = Vector3.zero;
 
@@ -407,7 +407,8 @@ public class GameController : MonoBehaviour
             //New Anim:
 
             currentWordboxImage.transform.DOScale(Vector3.one, duration);
-            await UniTask.Delay(millisecondsDelay:150);
+            //await UniTask.Delay(millisecondsDelay:150);
+            await UniTask.WaitUntil(() => (currentWordboxImage.transform.localScale == Vector3.one));
             
 
             // Set the scale again if we overshoot end anim 2
@@ -468,7 +469,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    async void ShowPopup(string message, float duration, bool stayForever = false)
+    async UniTaskVoid ShowPopup(string message, float duration, bool stayForever = false)
     {
         // Set the message of the popup
         popup.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message;
@@ -478,14 +479,12 @@ public class GameController : MonoBehaviour
         canvasGr.DOFade(1, 0.5f);
 
         // If it should stay forever or not
+        /*
         if (stayForever)
         {
-            while (true)
-            {
-                await UniTask.Delay(millisecondsDelay:150);
-               
-            }
+                await UniTask.Delay(TimeSpan.FromHours(1));
         }
+        */
         // Wait for the duration time
         await UniTask.Delay(millisecondsDelay:500);
         
@@ -494,7 +493,7 @@ public class GameController : MonoBehaviour
         canvasGr.DOFade(0, 0.5f);
     }
 
-    async void AnimateWordBox(Transform wordboxToAnimate)
+    async UniTaskVoid AnimateWordBox(Transform wordboxToAnimate)
     {
         // Duration of the animation
         float duration = 0.15f;
@@ -509,12 +508,16 @@ public class GameController : MonoBehaviour
         wordboxToAnimate.localScale = Vector3.one;
         
         wordboxToAnimate.transform.DOScale(scaledUp, duration);
-        await UniTask.Delay(millisecondsDelay:150);
-        
+        Debug.Log("Растёт");
+        //await UniTask.Delay(millisecondsDelay:150);
+        await UniTask.WaitUntil(() => (wordboxToAnimate.transform.localScale == scaledUp));
+        Debug.Log("Выросло");
 
         wordboxToAnimate.transform.DOScale(startScale, duration);
-        await UniTask.Delay(millisecondsDelay:150);
-        
+        Debug.Log("Уменьшается");
+        //await UniTask.Delay(millisecondsDelay:150);
+        await UniTask.WaitUntil(() => (wordboxToAnimate.transform.localScale == startScale));
+        Debug.Log("Уменьшилось");
 
         // Since we're checking if the timer is smaller and/or equals to the duration in the loop above,
         // the value might go above 1 which would give the wordbox a scale that is not equals to the desired scale.
