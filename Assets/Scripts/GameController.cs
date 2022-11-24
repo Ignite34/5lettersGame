@@ -345,34 +345,8 @@ public class GameController : MonoBehaviour
             // Duration of the animation
             float duration = 0.15f;
 
-            /* Old anim:
-            // Loop for the duration
-            while (timer <= duration)
-            {
-                 
-                // Value will go from 0 to 1
-                float value = timer / duration;
+            await currentWordboxImage.transform.DOScale(Vector3.zero, duration);
 
-                // Interpolate linearly from a scale of (1, 1, 1) to a scale of (0, 0, 0)
-                currentWordboxImage.transform.localScale = Vector3.Lerp(
-                    Vector3.one,
-                    Vector3.zero,
-                    value
-                );
-                currentWordboxImage.transform.DOScale(Vector3.zero, duration);
-            
-
-                // Increase timer
-                timer += Time.deltaTime;
-                yield return null;
-
-
-            }
-            */
-            //New anim:
-            currentWordboxImage.transform.DOScale(Vector3.zero, duration);
-            await UniTask.Delay(millisecondsDelay: 150);
-            //await UniTask.WaitUntil(() => (currentWordboxImage.transform.localScale == Vector3.zero));
             // Set the scale again if we overshoot end anim 1
             currentWordboxImage.transform.localScale = Vector3.zero;
 
@@ -384,35 +358,8 @@ public class GameController : MonoBehaviour
             currentWordboxColor.color = newTextColor;
             Debug.Log("New text color= " + currentWordboxColor);
 
-            /* Old anim:
 
-            // Same loop as before, but in reverse from from a scale of (0, 0, 0) to a scale of (1, 1, 1)
-            while (timer <= duration)
-            {
-                // Value will go from 0 to 1
-                float value = timer / duration;
-
-                // Interpolate linearly from a scale of (0, 0, 0) to a scale of (1, 1, 1)
-                currentWordboxImage.transform.localScale = Vector3.Lerp(
-                    Vector3.zero,
-                    Vector3.one,
-                    value
-                );
-
-                // Increase timer
-                timer += Time.deltaTime;
-                yield return null;
-            }
-            */
-            //New Anim:
-
-            currentWordboxImage.transform.DOScale(Vector3.one, duration);
-            await UniTask.Delay(millisecondsDelay: 150);
-            //await UniTask.WaitUntil(() => (currentWordboxImage.transform.localScale == Vector3.one));
-
-
-            // Set the scale again if we overshoot end anim 2
-            //currentWordboxImage.transform.localScale = Vector3.one;
+            await currentWordboxImage.transform.DOScale(Vector3.one, duration);
 
             // Set the color of the keyboard character to the "new color", only if it's "better" than the previous one
 
@@ -479,14 +426,14 @@ public class GameController : MonoBehaviour
         canvasGr.DOFade(1, 0.5f);
 
         // If it should stay forever or not
-        /*
+        
         if (stayForever)
         {
                 await UniTask.Delay(TimeSpan.FromHours(1));
         }
-        */
+        
         // Wait for the duration time
-        await UniTask.Delay(millisecondsDelay: 500);
+        await UniTask.Delay(millisecondsDelay: 2000);
 
         // Deactivate the popup
 
@@ -507,13 +454,10 @@ public class GameController : MonoBehaviour
         // Set the wordbox-scale to the starting scale, in case we're entering in the middle of another transition
         wordboxToAnimate.localScale = Vector3.one;
 
-        wordboxToAnimate.transform.DOScale(scaledUp, duration);
-        await UniTask.Delay(millisecondsDelay: 150);
-        //await UniTask.WaitUntil(() => (wordboxToAnimate.transform.localScale == scaledUp));
+        await wordboxToAnimate.transform.DOScale(scaledUp, duration);
 
-        wordboxToAnimate.transform.DOScale(startScale, duration);
-        await UniTask.Delay(millisecondsDelay: 150);
-        //await UniTask.WaitUntil(() => (wordboxToAnimate.transform.localScale == startScale));
+        await wordboxToAnimate.transform.DOScale(startScale, duration);
+
 
         // Since we're checking if the timer is smaller and/or equals to the duration in the loop above,
         // the value might go above 1 which would give the wordbox a scale that is not equals to the desired scale.
