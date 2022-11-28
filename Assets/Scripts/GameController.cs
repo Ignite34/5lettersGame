@@ -7,6 +7,7 @@ using TMPro;
 using DG.Tweening;
 using Cysharp.Threading.Tasks;
 using System;
+using System.Linq;
 
 public class GameController : MonoBehaviour
 {
@@ -54,6 +55,9 @@ public class GameController : MonoBehaviour
     // How many characters are there per row
     private int charactersPerRowCount = 5;
 
+    List<char> usedLetters = new List<char>();
+    List<char> correctLetters = new List<char>();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -69,6 +73,10 @@ public class GameController : MonoBehaviour
         // Choose a random correct word
         correctWord = GetRandomWord();
 
+        char[] correctWordLetters = correctWord.ToCharArray();
+
+        correctLetters = correctWordLetters.ToList();
+
         Screen.SetResolution(Screen.width, Screen.height, true);
     }
 
@@ -77,6 +85,35 @@ public class GameController : MonoBehaviour
         string randomWord = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
         Debug.Log(randomWord);
         return randomWord;
+    }
+
+    public void ShowHelpWord()
+    {
+        ShowPopup(GetHelpWord(), false);
+        for (int i = 0; i < usedLetters.Count; i++)
+        {
+            Debug.Log(usedLetters[i]);
+        }
+    }
+
+    string GetHelpWord()
+    {
+        char[] correctArray = correctWord.ToCharArray();
+        for (int i = 0; i < 5; i++)
+        {
+            if (!usedLetters.Contains(correctArray[i]))
+            {
+                for (int j = 0; j < guessingWords.Count; j++)
+                {
+                    string word = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
+                    if (word.Contains(correctArray[i]))
+                    {
+                        return ("Попробуйте слово: " + word.ToUpper());
+                    }
+                }
+            }
+        }
+        return "Больше помочь нельзя";
     }
 
     public void AddLetterToWordBox(string letter)
@@ -148,7 +185,7 @@ public class GameController : MonoBehaviour
         if (guess.Length != 5)
         {
             Debug.Log("Слово должно быть из 5 букв");
-            ShowPopup("Слово должно быть из 5 букв", 2f, false);
+            ShowPopup("Слово должно быть из 5 букв", false);
             Handheld.Vibrate();
             for (
                 int i = (currentRow * charactersPerRowCount);
@@ -185,7 +222,7 @@ public class GameController : MonoBehaviour
 
         if (wordExists == false)
         {
-            ShowPopup("Некорректное слово", 2f, false);
+            ShowPopup("Некорректное слово", false);
 
             Handheld.Vibrate();
             for (
@@ -250,6 +287,14 @@ public class GameController : MonoBehaviour
         AnimateWordBox(wordBoxes[currentlySelectedWordbox]);
     }
 
+    public void addUsedLetter(char usedLetter)
+    {
+        if (!usedLetters.Contains(usedLetter))
+        {
+            usedLetters.Add(usedLetter);
+        }
+    }
+
     async UniTaskVoid CheckWord(string guess)
     {
         // Set up variables
@@ -263,6 +308,7 @@ public class GameController : MonoBehaviour
         {
             if (playerGuessArray[i] == correctWordArray[i])
             {
+                addUsedLetter(playerGuessArray[i]);
                 // Correct place
                 playerGuessArray[i] = '0';
                 correctWordArray[i] = '0';
@@ -286,6 +332,7 @@ public class GameController : MonoBehaviour
                 && playerGuessArray[i] != '0'
             )
             {
+                addUsedLetter(playerGuessArray[i]);
                 char playerCharacter = playerGuessArray[i];
                 playerGuessArray[i] = '1';
                 tempPlayerGuess = "";
@@ -330,6 +377,7 @@ public class GameController : MonoBehaviour
                 // Character not used
                 newColor = colorUnused;
                 newTextColor = colorTextWhite;
+                addUsedLetter(tempPlayerGuess[i]);
             }
 
             // Reference variable
@@ -357,7 +405,6 @@ public class GameController : MonoBehaviour
             currentWordboxImage.color = newColor;
             currentWordboxColor.color = newTextColor;
             Debug.Log("New text color= " + currentWordboxColor);
-
 
             await currentWordboxImage.transform.DOScale(Vector3.one, duration);
 
@@ -396,7 +443,7 @@ public class GameController : MonoBehaviour
 
         if (guess == correctWord)
         {
-            ShowPopup("Поздравляем, это правильное слово!", 0f, true);
+            ShowPopup("Поздравляем, это правильное слово!", true);
             Debug.Log("Correct word!");
         }
         else
@@ -408,15 +455,11 @@ public class GameController : MonoBehaviour
 
         if (currentRow > amountOfRows)
         {
-            ShowPopup(
-                "Повезёт в следующий раз :(\n" + "Правильное слово: " + correctWord,
-                0f,
-                true
-            );
+            ShowPopup("Повезёт в следующий раз :(\n" + "Правильное слово: " + correctWord, true);
         }
     }
 
-    async UniTaskVoid ShowPopup(string message, float duration, bool stayForever = false)
+    async UniTaskVoid ShowPopup(string message, bool stayForever = false)
     {
         // Set the message of the popup
         popup.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message;
@@ -426,12 +469,12 @@ public class GameController : MonoBehaviour
         canvasGr.DOFade(1, 0.5f);
 
         // If it should stay forever or not
-        
+
         if (stayForever)
         {
-                await UniTask.Delay(TimeSpan.FromHours(1));
+            await UniTask.Delay(TimeSpan.FromHours(1));
         }
-        
+
         // Wait for the duration time
         await UniTask.Delay(millisecondsDelay: 2000);
 
@@ -457,7 +500,6 @@ public class GameController : MonoBehaviour
         await wordboxToAnimate.transform.DOScale(scaledUp, duration);
 
         await wordboxToAnimate.transform.DOScale(startScale, duration);
-
 
         // Since we're checking if the timer is smaller and/or equals to the duration in the loop above,
         // the value might go above 1 which would give the wordbox a scale that is not equals to the desired scale.
