@@ -17,6 +17,7 @@ public class GameController : MonoBehaviour
     public GameObject popup;
     public TextAsset textFile;
     public CanvasGroup canvasGr;
+    public GameObject masterHelper;
 
     //
     // Our different colors that we use
@@ -54,9 +55,13 @@ public class GameController : MonoBehaviour
 
     // How many characters are there per row
     private int charactersPerRowCount = 5;
+    public int index = 0;
 
     List<char> usedLetters = new List<char>();
     List<char> correctLetters = new List<char>();
+    List<char> inLetters = new List<char>();
+
+    char[] placeArray = new char[] { '0', '0', '0', '0', '0' };
 
     // Start is called before the first frame update
     void Start()
@@ -75,8 +80,6 @@ public class GameController : MonoBehaviour
 
         char[] correctWordLetters = correctWord.ToCharArray();
 
-        correctLetters = correctWordLetters.ToList();
-
         Screen.SetResolution(Screen.width, Screen.height, true);
     }
 
@@ -90,10 +93,11 @@ public class GameController : MonoBehaviour
     public void ShowHelpWord()
     {
         ShowPopup(GetHelpWord(), false);
-        for (int i = 0; i < usedLetters.Count; i++)
-        {
-            Debug.Log(usedLetters[i]);
-        }
+    }
+
+    public void ShowMasterWord()
+    {
+        ShowPopup(GetMasterWord(), false);
     }
 
     string GetHelpWord()
@@ -114,6 +118,63 @@ public class GameController : MonoBehaviour
             }
         }
         return "Больше помочь нельзя";
+    }
+
+    string GetMasterWord()
+    {
+        Debug.Log("In letters count " + inLetters.Count);
+        if (inLetters.Count != 0)
+        {
+            for (int i = 0; i < guessingWords.Count; i++)
+            {
+                string word = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
+                char[] wordArray = word.ToCharArray();
+                if (inLetters.Count != 0)
+                {
+                    Debug.Log("Поиск белыхых букв");
+                    //looking if we have all the marked letters from word
+                    bool allLetters = true;
+                    for (int j = 0; j < inLetters.Count; j++)
+                    {
+                        if (!word.Contains(inLetters[j]))
+                        {
+                            allLetters = false;
+                        }
+                    }
+                    //looking if we have correct letters on the correct positions
+                    if (allLetters)
+                    {
+                        if (correctLetters.Count != 0)
+                        {
+                            Debug.Log("Поиск верных букв");
+                            bool wordCorrect = true;
+                            for (int j = 0; j < 5; j++)
+                            {
+                                if (placeArray[j] != '0')
+                                {
+                                    Debug.Log("Верная буква " + placeArray[j]);
+                                    Debug.Log("Порядок " + j);
+                                }
+                                if (placeArray[j] != '0' && wordArray[j] != placeArray[j])
+                                {
+                                    wordCorrect = false;
+                                }
+                            }
+                            if (wordCorrect && word != correctWord)
+                            {
+                                return ("Мастер слово: " + word.ToUpper());
+                            }
+                        }
+                        else
+                        {
+                            return ("Мастер слово: " + word.ToUpper());
+                        }
+                    }
+                }
+            }
+            return ("Мастер слов нет ");
+        }
+        return ("Мастер слов нет ");
     }
 
     public void AddLetterToWordBox(string letter)
@@ -254,7 +315,6 @@ public class GameController : MonoBehaviour
     {
         if (currentRow > amountOfRows)
         {
-            Debug.Log("No more rows available");
             return;
         }
 
@@ -298,18 +358,29 @@ public class GameController : MonoBehaviour
     async UniTaskVoid CheckWord(string guess)
     {
         // Set up variables
+        index = 0;
         char[] playerGuessArray = guess.ToCharArray();
         string tempPlayerGuess = guess;
         char[] correctWordArray = correctWord.ToCharArray();
         string tempCorrectWord = correctWord;
+        for (int i = 0; i < 5; i++)
+        {
+            placeArray[i] = '0';
+        }
+        inLetters.Clear();
+        correctLetters.Clear();
 
         // Swap correct characters with '0'
         for (int i = 0; i < 5; i++)
         {
+            addUsedLetter(playerGuessArray[i]);
             if (playerGuessArray[i] == correctWordArray[i])
             {
-                addUsedLetter(playerGuessArray[i]);
                 // Correct place
+                correctLetters.Add(playerGuessArray[i]);
+                placeArray[i] = playerGuessArray[i];
+                correctLetters.Add(Convert.ToChar(i));
+                inLetters.Add(playerGuessArray[i]);
                 playerGuessArray[i] = '0';
                 correctWordArray[i] = '0';
             }
@@ -332,7 +403,7 @@ public class GameController : MonoBehaviour
                 && playerGuessArray[i] != '0'
             )
             {
-                addUsedLetter(playerGuessArray[i]);
+                inLetters.Add(playerGuessArray[i]);
                 char playerCharacter = playerGuessArray[i];
                 playerGuessArray[i] = '1';
                 tempPlayerGuess = "";
@@ -352,6 +423,9 @@ public class GameController : MonoBehaviour
                 }
             }
         }
+
+        string s = new string(playerGuessArray);
+        Debug.Log(s);
 
         // Set the fallback color to gray and white for text
         Color newColor = colorUnused;
@@ -377,7 +451,6 @@ public class GameController : MonoBehaviour
                 // Character not used
                 newColor = colorUnused;
                 newTextColor = colorTextWhite;
-                addUsedLetter(tempPlayerGuess[i]);
             }
 
             // Reference variable
@@ -404,7 +477,6 @@ public class GameController : MonoBehaviour
             // Set the color of the wordbox to the "new color"
             currentWordboxImage.color = newColor;
             currentWordboxColor.color = newTextColor;
-            Debug.Log("New text color= " + currentWordboxColor);
 
             await currentWordboxImage.transform.DOScale(Vector3.one, duration);
 
