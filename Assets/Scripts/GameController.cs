@@ -18,6 +18,13 @@ public class GameController : MonoBehaviour
     public TextAsset textFile;
     public CanvasGroup canvasGr;
     public GameObject masterHelper;
+    public GameObject menu;
+    public GameObject enterMenu;
+    public GameObject classicalUI;
+    public GameObject reversedUI;
+    public GameObject wordBoxesUI;
+    private bool started = false;
+    private bool classic = true;
 
     //
     // Our different colors that we use
@@ -46,6 +53,7 @@ public class GameController : MonoBehaviour
 
     // All wordboxes
     public List<Transform> wordBoxes = new List<Transform>();
+    public List<Transform> reverseWordBoxes = new List<Transform>();
 
     // Current wordbox that we're inputting in
     private int currentWordBox;
@@ -60,27 +68,51 @@ public class GameController : MonoBehaviour
     List<char> usedLetters = new List<char>();
     List<char> correctLetters = new List<char>();
     List<char> inLetters = new List<char>();
+    List<char> bannedLetters = new List<char>();
 
     char[] placeArray = new char[] { '0', '0', '0', '0', '0' };
 
     // Start is called before the first frame update
     void Start()
     {
-        //string textPath = Path.Combine(Application.streamingAssetsPath, "words.txt");
-        // Populate the dictionary
+        Screen.SetResolution(Screen.width, Screen.height, true);
+    }
 
+    public void StartClassic()
+    {
+        classic = true;
+        classicalUI.gameObject.SetActive(true);
+        wordBoxesUI.gameObject.SetActive(true);
+        StartGame();
+    }
+
+    public void StartReverse()
+    {
+        classic = false;
+        StartGame();
+    }
+
+    public void StartGame()
+    {
+        // Populate the dictionary
+        menu.gameObject.SetActive(false);
 
         AddWordsToList(dictionary);
 
         // Populate the guessing words
         AddWordsToList(guessingWords);
 
-        // Choose a random correct word
-        correctWord = GetRandomWord();
+        if (classic)
+        {
+            // Choose a random correct word
+            correctWord = GetRandomWord();
 
-        char[] correctWordLetters = correctWord.ToCharArray();
-
-        Screen.SetResolution(Screen.width, Screen.height, true);
+            char[] correctWordLetters = correctWord.ToCharArray();
+        }
+        else
+        {
+            enterMenu.gameObject.SetActive(true);
+        }
     }
 
     string GetRandomWord()
@@ -120,91 +152,150 @@ public class GameController : MonoBehaviour
         return "Больше помочь нельзя";
     }
 
+    async UniTaskVoid ReverseGuessWord()
+    {
+        string word = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
+        ReverseEnterWord(word.ToUpper());
+        CheckWord(word);
+
+        for (int i = 0; i < 5; i++)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(3));
+            word = GetMasterWord().ToLower();
+            ReverseEnterWord(word.ToUpper());
+            CheckWord(word);
+        }
+    }
+
+    void ReverseEnterWord(string word)
+    {
+        char[] wordArray = word.ToCharArray();
+        for (int i = 0; i < 5; i++)
+        {
+            AddLetterToWordBox(wordArray[i].ToString());
+        }
+    }
+
     string GetMasterWord()
     {
-        Debug.Log("In letters count " + inLetters.Count);
         if (inLetters.Count != 0)
         {
+            Debug.Log("Букв в списке - " + inLetters.Count);
             for (int i = 0; i < guessingWords.Count; i++)
             {
                 string word = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
                 char[] wordArray = word.ToCharArray();
-                if (inLetters.Count != 0)
+                bool wordCorrect = true;
+                bool allLetters = true;
+                //check if we have all the marked letters from word
+                for (int j = 0; j < inLetters.Count; j++)
                 {
-                    Debug.Log("Поиск белыхых букв");
-                    //looking if we have all the marked letters from word
-                    bool allLetters = true;
-                    for (int j = 0; j < inLetters.Count; j++)
+                    if (!word.Contains(inLetters[j]))
                     {
-                        if (!word.Contains(inLetters[j]))
+                        allLetters = false;
+                    }
+                }
+                //check if we have any banned letters
+                for (int j = 0; j < bannedLetters.Count; j++)
+                {
+                    if (word.Contains(bannedLetters[j]))
+                    {
+                        wordCorrect = false;
+                    }
+                }
+                //check if we have correct letters on the correct positions
+                if (allLetters && wordCorrect)
+                {
+                    if (correctLetters.Count != 0)
+                    {
+                        for (int j = 0; j < 5; j++)
                         {
-                            allLetters = false;
+                            if (placeArray[j] != '0' && wordArray[j] != placeArray[j])
+                            {
+                                wordCorrect = false;
+                            }
+                        }
+                        if (wordCorrect)
+                        {
+                            Debug.Log("Вывожу слово с правильными подходящими буквами");
+                            return (word);
                         }
                     }
-                    //looking if we have correct letters on the correct positions
-                    if (allLetters)
+                    else
                     {
-                        if (correctLetters.Count != 0)
-                        {
-                            Debug.Log("Поиск верных букв");
-                            bool wordCorrect = true;
-                            for (int j = 0; j < 5; j++)
-                            {
-                                if (placeArray[j] != '0')
-                                {
-                                    Debug.Log("Верная буква " + placeArray[j]);
-                                    Debug.Log("Порядок " + j);
-                                }
-                                if (placeArray[j] != '0' && wordArray[j] != placeArray[j])
-                                {
-                                    wordCorrect = false;
-                                }
-                            }
-                            if (wordCorrect && word != correctWord)
-                            {
-                                return ("Мастер слово: " + word.ToUpper());
-                            }
-                        }
-                        else
-                        {
-                            return ("Мастер слово: " + word.ToUpper());
-                        }
+                        Debug.Log("Вывожу слово без правильных букв");
+                        return (word);
                     }
                 }
             }
-            return ("Мастер слов нет ");
         }
-        return ("Мастер слов нет ");
+        Debug.Log("Нет входящих букв");
+        return (guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)]);
     }
 
     public void AddLetterToWordBox(string letter)
     {
-        if (currentRow > amountOfRows)
+        if (classic || started)
         {
-            Debug.Log("No more rows available");
-            return;
-        }
+            if (currentRow > amountOfRows)
+            {
+                Debug.Log("No more rows available");
+                return;
+            }
 
-        if (
-            wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]
-                .GetChild(0)
-                .GetComponent<TextMeshProUGUI>()
-                .text == ""
-        )
-        {
-            wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]
-                .GetChild(0)
-                .GetComponent<TextMeshProUGUI>()
-                .text = letter;
-            AnimateWordBox(wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]);
-        }
+            if (
+                wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]
+                    .GetChild(0)
+                    .GetComponent<TextMeshProUGUI>()
+                    .text == ""
+            )
+            {
+                wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]
+                    .GetChild(0)
+                    .GetComponent<TextMeshProUGUI>()
+                    .text = letter;
+                AnimateWordBox(wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]);
+            }
 
-        if (
-            (currentRow * charactersPerRowCount) + currentWordBox
-            < (currentRow * charactersPerRowCount) + 4
-        )
+            if (
+                (currentRow * charactersPerRowCount) + currentWordBox
+                < (currentRow * charactersPerRowCount) + 4
+            )
+            {
+                currentWordBox++;
+            }
+        }
+        else
         {
-            currentWordBox++;
+            if (currentRow > 1)
+            {
+                Debug.Log("No more rows available");
+                return;
+            }
+
+            if (
+                reverseWordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]
+                    .GetChild(0)
+                    .GetComponent<TextMeshProUGUI>()
+                    .text == ""
+            )
+            {
+                reverseWordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]
+                    .GetChild(0)
+                    .GetComponent<TextMeshProUGUI>()
+                    .text = letter;
+                AnimateWordBox(
+                    reverseWordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]
+                );
+            }
+
+            if (
+                (currentRow * charactersPerRowCount) + currentWordBox
+                < (currentRow * charactersPerRowCount) + 4
+            )
+            {
+                currentWordBox++;
+            }
         }
     }
 
@@ -307,8 +398,82 @@ public class GameController : MonoBehaviour
 
         // Output the guess to the console
         Debug.Log("Player guess:" + guess);
+
         CheckWord(guess);
-        // If the guess was correct, output that the player has won into the console
+    }
+
+    public void SubmitReverseWord()
+    {
+        // The players guess
+        string winWord = "";
+        for (int i = 0; i < 5; i++)
+        {
+            // Add each letter to the players guess
+            winWord += reverseWordBoxes[i].GetChild(0).GetComponent<TextMeshProUGUI>().text;
+        }
+
+        if (winWord.Length != 5)
+        {
+            Debug.Log("Слово должно быть из 5 букв");
+            ShowPopup("Слово должно быть из 5 букв", false);
+            Handheld.Vibrate();
+            for (int i = 0; i < 5; i++)
+            {
+                reverseWordBoxes[i].transform.DOShakePosition(
+                    0.5f,
+                    5f,
+                    10,
+                    0,
+                    true,
+                    true,
+                    ShakeRandomnessMode.Harmonic
+                );
+            }
+            return;
+        }
+
+        // All words are in the list is in lowercase, so let's convert the guess to that as well
+        winWord = winWord.ToLower();
+
+        // Check if the word exists in the dictionary
+        bool wordExists = false;
+        foreach (var word in dictionary)
+        {
+            if (winWord == word)
+            {
+                wordExists = true;
+                break;
+            }
+        }
+
+        if (wordExists == false)
+        {
+            ShowPopup("Некорректное слово", false);
+
+            Handheld.Vibrate();
+            for (int i = 0; i < 5; i++)
+            {
+                reverseWordBoxes[i].transform.DOShakePosition(
+                    0.5f,
+                    5f,
+                    10,
+                    0,
+                    true,
+                    true,
+                    ShakeRandomnessMode.Harmonic
+                );
+            }
+            return;
+        }
+
+        correctWord = winWord;
+        Debug.Log("Загаданное слово: " + correctWord);
+        currentWordBox = 0;
+        currentRow = 0;
+        enterMenu.gameObject.SetActive(false);
+        wordBoxesUI.gameObject.SetActive(true);
+        started = true;
+        ReverseGuessWord();
     }
 
     public void RemoveLetterFromWordBox()
@@ -347,11 +512,42 @@ public class GameController : MonoBehaviour
         AnimateWordBox(wordBoxes[currentlySelectedWordbox]);
     }
 
+    public void RemoveReverseLetterFromWordBox()
+    {
+        // If the text in the current wordbox is empty, go back a step and clear the one
+        // that comes after
+        if (reverseWordBoxes[currentWordBox].GetChild(0).GetComponent<TextMeshProUGUI>().text == "")
+        {
+            if (currentWordBox > 0)
+            {
+                // Step back
+                currentWordBox--;
+            }
+
+            reverseWordBoxes[currentWordBox].GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
+        }
+        else
+        {
+            // If it wasn't empty, we clear the one selected instead
+            reverseWordBoxes[currentWordBox].GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
+        }
+        AnimateWordBox(reverseWordBoxes[currentWordBox]);
+    }
+
     public void addUsedLetter(char usedLetter)
     {
         if (!usedLetters.Contains(usedLetter))
         {
             usedLetters.Add(usedLetter);
+        }
+    }
+
+    public void addBannedLetter(char bannedLetter)
+    {
+        if (!bannedLetters.Contains(bannedLetter) && !inLetters.Contains(bannedLetter))
+        {
+            bannedLetters.Add(bannedLetter);
+            Debug.Log("Исключена буква " + bannedLetter);
         }
     }
 
@@ -363,12 +559,6 @@ public class GameController : MonoBehaviour
         string tempPlayerGuess = guess;
         char[] correctWordArray = correctWord.ToCharArray();
         string tempCorrectWord = correctWord;
-        for (int i = 0; i < 5; i++)
-        {
-            placeArray[i] = '0';
-        }
-        inLetters.Clear();
-        correctLetters.Clear();
 
         // Swap correct characters with '0'
         for (int i = 0; i < 5; i++)
@@ -376,11 +566,36 @@ public class GameController : MonoBehaviour
             addUsedLetter(playerGuessArray[i]);
             if (playerGuessArray[i] == correctWordArray[i])
             {
+                int correctCount = 0;
+                int letterCount = 0;
                 // Correct place
-                correctLetters.Add(playerGuessArray[i]);
-                placeArray[i] = playerGuessArray[i];
-                correctLetters.Add(Convert.ToChar(i));
-                inLetters.Add(playerGuessArray[i]);
+                if (placeArray[i] == '0')
+                {
+                    correctLetters.Add(playerGuessArray[i]);
+                    placeArray[i] = playerGuessArray[i];
+                    correctLetters.Add(Convert.ToChar(i));
+                }
+
+                for (int j = 0; j < 5; j++)
+                {
+                    if (correctWordArray[j] == playerGuessArray[i])
+                    {
+                        correctCount++;
+                    }
+                }
+
+                for (int j = 0; j < inLetters.Count; j++)
+                {
+                    if (inLetters[j] == playerGuessArray[i])
+                    {
+                        letterCount++;
+                    }
+                }
+
+                if (letterCount < correctCount)
+                {
+                    inLetters.Add(playerGuessArray[i]);
+                }
                 playerGuessArray[i] = '0';
                 correctWordArray[i] = '0';
             }
@@ -403,7 +618,29 @@ public class GameController : MonoBehaviour
                 && playerGuessArray[i] != '0'
             )
             {
-                inLetters.Add(playerGuessArray[i]);
+                int correctCount = 0;
+                int letterCount = 0;
+
+                for (int j = 0; j < 5; j++)
+                {
+                    if (correctWordArray[j] == playerGuessArray[i])
+                    {
+                        correctCount++;
+                    }
+                }
+
+                for (int j = 0; j < inLetters.Count; j++)
+                {
+                    if (inLetters[j] == playerGuessArray[i])
+                    {
+                        letterCount++;
+                    }
+                }
+
+                if (letterCount < correctCount)
+                {
+                    inLetters.Add(playerGuessArray[i]);
+                }
                 char playerCharacter = playerGuessArray[i];
                 playerGuessArray[i] = '1';
                 tempPlayerGuess = "";
@@ -423,9 +660,6 @@ public class GameController : MonoBehaviour
                 }
             }
         }
-
-        string s = new string(playerGuessArray);
-        Debug.Log(s);
 
         // Set the fallback color to gray and white for text
         Color newColor = colorUnused;
@@ -449,6 +683,7 @@ public class GameController : MonoBehaviour
             else
             {
                 // Character not used
+                addBannedLetter(tempPlayerGuess[i]);
                 newColor = colorUnused;
                 newTextColor = colorTextWhite;
             }
