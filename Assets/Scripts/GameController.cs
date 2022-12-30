@@ -6,10 +6,11 @@ using System.IO;
 using TMPro;
 using DG.Tweening;
 using Cysharp.Threading.Tasks;
+using System.Threading;
 using System;
 using System.Linq;
 
-public class GameController : MonoBehaviour
+public partial class GameController : MonoBehaviour
 {
     // Curve for animating the wordboxes
     public AnimationCurve wordBoxInteractionCurve;
@@ -26,9 +27,9 @@ public class GameController : MonoBehaviour
     public GameObject wordBoxesUI;
     public GameObject gameGuessUI;
     public GameObject chooseColorObject;
-    private string currentWord;
+    public string currentWord;
     private bool started = false;
-    private bool classic = true;
+    public bool classic = true;
     private bool gameGuess = false;
 
     //
@@ -50,10 +51,10 @@ public class GameController : MonoBehaviour
     private int amountOfRows = 5;
 
     // List with all the words
-    private List<string> dictionary = new List<string>();
+    public List<string> dictionary = new List<string>();
 
     // List with words that can be chosen as correct words
-    private List<string> guessingWords = new List<string>();
+    public List<string> guessingWords = new List<string>();
 
     public string correctWord;
 
@@ -86,61 +87,9 @@ public class GameController : MonoBehaviour
         Screen.SetResolution(Screen.width, Screen.height, true);
     }
 
-    public void StartClassic()
-    {
-        classic = true;
-        classicalUI.gameObject.SetActive(true);
-        wordBoxesUI.gameObject.SetActive(true);
-
-        // Populate the dictionary
-        menu.gameObject.SetActive(false);
-
-        AddWordsToList(dictionary);
-
-        // Populate the guessing words
-        AddWordsToList(guessingWords);
-
-        // Choose a random correct word
-        correctWord = GetRandomWord();
-
-        char[] correctWordLetters = correctWord.ToCharArray();
-    }
-
-    public void StartGameGuess()
-    {
-        gameGuess = true;
-        gameGuessUI.gameObject.SetActive(true);
-
-        // Populate the dictionary
-        menu.gameObject.SetActive(false);
-
-        AddWordsToList(dictionary);
-
-        // Populate the guessing words
-        AddWordsToList(guessingWords);
-
-        string word = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
-        GameGuessEnterWord(word.ToUpper());
-    }
-
-    public void StartReverse()
-    {
-        classic = false;
-
-        // Populate the dictionary
-        menu.gameObject.SetActive(false);
-
-        AddWordsToList(dictionary);
-
-        // Populate the guessing words
-        AddWordsToList(guessingWords);
-
-        enterMenu.gameObject.SetActive(true);
-    }
-
     public void StartGame() { }
 
-    string GetRandomWord()
+    public string GetRandomWord()
     {
         string randomWord = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
         Debug.Log(randomWord);
@@ -149,12 +98,14 @@ public class GameController : MonoBehaviour
 
     public void ShowHelpWord()
     {
-        ShowPopup(GetHelpWord(), false);
+        var token = new CancellationTokenSource();
+        ShowPopupAsync(GetHelpWord(), token.Token, false);
     }
 
     public void ShowMasterWord()
     {
-        ShowPopup(GetMasterWord(), false);
+        var token = new CancellationTokenSource();
+        ShowPopupAsync(GetMasterWord(), token.Token, false);
     }
 
     string GetHelpWord()
@@ -177,227 +128,9 @@ public class GameController : MonoBehaviour
         return "Больше помочь нельзя";
     }
 
-    void GameGuessEnterWord(string word)
-    {
-        currentWord = word.ToLower();
-        char[] wordArray = word.ToCharArray();
-        for (int i = 0; i < 5; i++)
-        {
-            Image currentWordboxImage = GameGuessWordBoxes[i].GetComponent<Image>();
-            TextMeshProUGUI currentWordboxText = GameGuessWordBoxes[i]
-                .GetChild(0)
-                .GetComponent<TextMeshProUGUI>();
-            currentWordboxImage.sprite = defaultSprite;
-            currentWordboxImage.color = colorCorrect;
-            currentWordboxText.color = colorTextWhite;
-            GameGuessAddLetterToWordBox(wordArray[i].ToString());
-        }
-    }
-
-    public void CorrectButton()
-    {
-        HideColorChoosePopup();
-        GameGuessPaintCorrectWordBox();
-    }
-
-    public void BannedButton()
-    {
-        HideColorChoosePopup();
-        GameGuessPaintBannedWordBox();
-    }
-
-    public void IncorrectPlaceButton()
-    {
-        HideColorChoosePopup();
-        GameGuessIncorrectPlaceWordBox();
-    }
-
-    public void GameGuessWordBoxPressed(int buttonNumber)
-    {
-        gameGuessIndex = buttonNumber;
-        ShowColorChoosePopup();
-    }
-
-    async UniTaskVoid ShowColorChoosePopup()
-    {
-        chooseColorObject.SetActive(true);
-        await chooseColor.DOFade(1, 0.15f);
-        Debug.Log("Вывожу меню цвета");
-    }
-
-    async UniTaskVoid HideColorChoosePopup()
-    {
-        await chooseColor.DOFade(0, 0.15f);
-        chooseColorObject.SetActive(false);
-    }
-
-    async UniTaskVoid GameGuessPaintCorrectWordBox()
-    {
-        Image currentWordboxImage = GameGuessWordBoxes[gameGuessIndex].GetComponent<Image>();
-        TextMeshProUGUI currentWordboxText = GameGuessWordBoxes[gameGuessIndex]
-            .GetChild(0)
-            .GetComponent<TextMeshProUGUI>();
-
-        // Duration of the animation
-        float duration = 0.15f;
-
-        await currentWordboxImage.transform.DOScale(Vector3.zero, duration);
-
-        // Set the scale again if we overshoot end anim 1
-        currentWordboxImage.transform.localScale = Vector3.zero;
-
-        // Change the sprite
-        currentWordboxImage.sprite = clearedWordBoxSprite;
-
-        // Set the color of the wordbox to the "new color"
-        currentWordboxImage.color = colorCorrect;
-        currentWordboxText.color = colorTextBlack;
-
-        await currentWordboxImage.transform.DOScale(Vector3.one, duration);
-    }
-
-    async UniTaskVoid GameGuessPaintBannedWordBox()
-    {
-        Image currentWordboxImage = GameGuessWordBoxes[gameGuessIndex].GetComponent<Image>();
-        TextMeshProUGUI currentWordboxText = GameGuessWordBoxes[gameGuessIndex]
-            .GetChild(0)
-            .GetComponent<TextMeshProUGUI>();
-        // Duration of the animation
-        float duration = 0.15f;
-
-        await currentWordboxImage.transform.DOScale(Vector3.zero, duration);
-
-        // Set the scale again if we overshoot end anim 1
-        currentWordboxImage.transform.localScale = Vector3.zero;
-
-        // Change the sprite
-        currentWordboxImage.sprite = clearedWordBoxSprite;
-
-        // Set the color of the wordbox to the "new color"
-        currentWordboxImage.color = colorUnused;
-        currentWordboxText.color = colorTextWhite;
-
-        await currentWordboxImage.transform.DOScale(Vector3.one, duration);
-    }
-
-    async UniTaskVoid GameGuessIncorrectPlaceWordBox()
-    {
-        Image currentWordboxImage = GameGuessWordBoxes[gameGuessIndex].GetComponent<Image>();
-        TextMeshProUGUI currentWordboxText = GameGuessWordBoxes[gameGuessIndex]
-            .GetChild(0)
-            .GetComponent<TextMeshProUGUI>();
-        // Duration of the animation
-        float duration = 0.15f;
-
-        await currentWordboxImage.transform.DOScale(Vector3.zero, duration);
-
-        // Set the scale again if we overshoot end anim 1
-        currentWordboxImage.transform.localScale = Vector3.zero;
-
-        // Change the sprite
-        currentWordboxImage.sprite = clearedWordBoxSprite;
-
-        // Set the color of the wordbox to the "new color"
-        currentWordboxImage.color = colorIncorrectPlace;
-        currentWordboxText.color = colorTextBlack;
-
-        await currentWordboxImage.transform.DOScale(Vector3.one, duration);
-    }
-
-    public void SubmitGameGuessWord()
-    {
-        char[] wordArray = currentWord.ToCharArray();
-        bool wordCorrect = true;
-        int winCount = 0;
-        for (int i = 0; i < 5; i++)
-        {
-            Image currentWordboxImage = GameGuessWordBoxes[i].GetComponent<Image>();
-            TextMeshProUGUI currentWordboxText = GameGuessWordBoxes[i]
-                .GetChild(0)
-                .GetComponent<TextMeshProUGUI>();
-            addUsedLetter(wordArray[i]);
-            if (
-                currentWordboxImage.color == colorCorrect
-                && currentWordboxText.color == colorTextBlack
-            )
-            {
-                winCount++;
-                addInLetter(wordArray[i]);
-                correctLetters.Add(wordArray[i]);
-                placeArray[i] = wordArray[i];
-                correctLetters.Add(Convert.ToChar(i));
-                Debug.Log("Верно");
-            }
-            else if (currentWordboxImage.color == colorIncorrectPlace)
-            {
-                addInLetter(wordArray[i]);
-                Debug.Log("Почти");
-            }
-            else if (
-                currentWordboxImage.color == colorCorrect
-                && currentWordboxText.color != colorTextBlack
-            )
-            {
-                wordCorrect = false;
-                ShowPopup("Пометьте все буквы", false);
-                Debug.Log("Не все");
-            }
-        }
-        for (int i = 0; i < 5; i++)
-        {
-            Image currentWordboxImage = GameGuessWordBoxes[i].GetComponent<Image>();
-            TextMeshProUGUI currentWordboxText = GameGuessWordBoxes[i]
-                .GetChild(0)
-                .GetComponent<TextMeshProUGUI>();
-            if (currentWordboxImage.color == colorUnused)
-            {
-                addBannedLetter(wordArray[i]);
-                Debug.Log("Неверно");
-            }
-        }
-        if (wordCorrect && winCount == 5)
-        {
-            ShowPopup("Слово угадано! Это успех!", true);
-        }
-        else if (wordCorrect)
-        {
-            currentWordBox = 0;
-            GameGuessEnterWord(GetMasterWord().ToUpper());
-        }
-        else
-        {
-            wordCorrect = false;
-            ShowPopup("Пометьте все буквы", false);
-            Debug.Log("Не все 1");
-        }
-    }
-
-    async UniTaskVoid ReverseGuessWord()
-    {
-        string word = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
-        ReverseEnterWord(word.ToUpper());
-        CheckWord(word);
-
-        for (int i = 0; i < 5; i++)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(3));
-            word = GetMasterWord().ToLower();
-            ReverseEnterWord(word.ToUpper());
-            CheckWord(word);
-        }
-    }
-
-    void ReverseEnterWord(string word)
-    {
-        char[] wordArray = word.ToCharArray();
-        for (int i = 0; i < 5; i++)
-        {
-            AddLetterToWordBox(wordArray[i].ToString());
-        }
-    }
-
     string GetMasterWord()
     {
+        var token = new CancellationTokenSource();
         for (int i = 0; i < guessingWords.Count; i++)
         {
             string word = guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)];
@@ -458,25 +191,15 @@ public class GameController : MonoBehaviour
         }
         if (gameGuess)
         {
-            ShowPopup("Что-то пошло не так - слова кончились :(", true);
+            ShowPopupAsync("Что-то пошло не так - слова кончились :(", token.Token, true);
         }
         Debug.Log("Нет входящих букв");
         return (guessingWords[UnityEngine.Random.Range(0, guessingWords.Count)]);
     }
 
-    public void GameGuessAddLetterToWordBox(string letter)
-    {
-        GameGuessWordBoxes[currentWordBox].GetChild(0).GetComponent<TextMeshProUGUI>().text =
-            letter;
-        AnimateWordBox(GameGuessWordBoxes[currentWordBox]);
-        if (currentWordBox < 4)
-        {
-            currentWordBox++;
-        }
-    }
-
     public void AddLetterToWordBox(string letter)
     {
+        var token = new CancellationTokenSource();
         if (classic || started)
         {
             if (currentRow > amountOfRows)
@@ -496,7 +219,10 @@ public class GameController : MonoBehaviour
                     .GetChild(0)
                     .GetComponent<TextMeshProUGUI>()
                     .text = letter;
-                AnimateWordBox(wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]);
+                AnimateWordBoxAsync(
+                    wordBoxes[(currentRow * charactersPerRowCount) + currentWordBox],
+                    token.Token
+                );
             }
 
             if (
@@ -526,8 +252,9 @@ public class GameController : MonoBehaviour
                     .GetChild(0)
                     .GetComponent<TextMeshProUGUI>()
                     .text = letter;
-                AnimateWordBox(
-                    reverseWordBoxes[(currentRow * charactersPerRowCount) + currentWordBox]
+                AnimateWordBoxAsync(
+                    reverseWordBoxes[(currentRow * charactersPerRowCount) + currentWordBox],
+                    token.Token
                 );
             }
 
@@ -541,7 +268,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    void AddWordsToList(List<string> listOfWords)
+    public void AddWordsToList(List<string> listOfWords)
     {
         TextAsset tAsset = Resources.Load("words") as TextAsset;
         // Read the text from the file
@@ -562,164 +289,9 @@ public class GameController : MonoBehaviour
         //reader.Close();
     }
 
-    public void SubmitWord()
-    {
-        // The players guess
-        string guess = "";
-        for (
-            int i = (currentRow * charactersPerRowCount);
-            i < (currentRow * charactersPerRowCount) + currentWordBox + 1;
-            i++
-        )
-        {
-            // Add each letter to the players guess
-            guess += wordBoxes[i].GetChild(0).GetComponent<TextMeshProUGUI>().text;
-        }
-
-        if (guess.Length != 5)
-        {
-            Debug.Log("Слово должно быть из 5 букв");
-            ShowPopup("Слово должно быть из 5 букв", false);
-            Handheld.Vibrate();
-            for (
-                int i = (currentRow * charactersPerRowCount);
-                i < (currentRow * charactersPerRowCount) + charactersPerRowCount;
-                i++
-            )
-            {
-                wordBoxes[i].transform.DOShakePosition(
-                    0.5f,
-                    5f,
-                    10,
-                    0,
-                    true,
-                    true,
-                    ShakeRandomnessMode.Harmonic
-                );
-            }
-            return;
-        }
-
-        // All words are in the list is in lowercase, so let's convert the guess to that as well
-        guess = guess.ToLower();
-
-        // Check if the word exists in the dictionary
-        bool wordExists = false;
-        foreach (var word in dictionary)
-        {
-            if (guess == word)
-            {
-                wordExists = true;
-                break;
-            }
-        }
-
-        if (wordExists == false)
-        {
-            ShowPopup("Некорректное слово", false);
-
-            Handheld.Vibrate();
-            for (
-                int i = (currentRow * charactersPerRowCount);
-                i < (currentRow * charactersPerRowCount) + charactersPerRowCount;
-                i++
-            )
-            {
-                wordBoxes[i].transform.DOShakePosition(
-                    0.5f,
-                    5f,
-                    10,
-                    0,
-                    true,
-                    true,
-                    ShakeRandomnessMode.Harmonic
-                );
-            }
-            return;
-        }
-
-        // Output the guess to the console
-        Debug.Log("Player guess:" + guess);
-
-        CheckWord(guess);
-    }
-
-    public void SubmitReverseWord()
-    {
-        // The players guess
-        string winWord = "";
-        for (int i = 0; i < 5; i++)
-        {
-            // Add each letter to the players guess
-            winWord += reverseWordBoxes[i].GetChild(0).GetComponent<TextMeshProUGUI>().text;
-        }
-
-        if (winWord.Length != 5)
-        {
-            Debug.Log("Слово должно быть из 5 букв");
-            ShowPopup("Слово должно быть из 5 букв", false);
-            Handheld.Vibrate();
-            for (int i = 0; i < 5; i++)
-            {
-                reverseWordBoxes[i].transform.DOShakePosition(
-                    0.5f,
-                    5f,
-                    10,
-                    0,
-                    true,
-                    true,
-                    ShakeRandomnessMode.Harmonic
-                );
-            }
-            return;
-        }
-
-        // All words are in the list is in lowercase, so let's convert the guess to that as well
-        winWord = winWord.ToLower();
-
-        // Check if the word exists in the dictionary
-        bool wordExists = false;
-        foreach (var word in dictionary)
-        {
-            if (winWord == word)
-            {
-                wordExists = true;
-                break;
-            }
-        }
-
-        if (wordExists == false)
-        {
-            ShowPopup("Некорректное слово", false);
-
-            Handheld.Vibrate();
-            for (int i = 0; i < 5; i++)
-            {
-                reverseWordBoxes[i].transform.DOShakePosition(
-                    0.5f,
-                    5f,
-                    10,
-                    0,
-                    true,
-                    true,
-                    ShakeRandomnessMode.Harmonic
-                );
-            }
-            return;
-        }
-
-        correctWord = winWord;
-        Debug.Log("Загаданное слово: " + correctWord);
-        currentWordBox = 0;
-        currentRow = 0;
-        enterMenu.gameObject.SetActive(false);
-        wordBoxesUI.gameObject.SetActive(true);
-        started = true;
-        ReverseGuessWord();
-    }
-
     public void RemoveLetterFromWordBox()
     {
+        var token = new CancellationTokenSource();
         if (currentRow > amountOfRows)
         {
             return;
@@ -751,29 +323,7 @@ public class GameController : MonoBehaviour
             wordBoxes[currentlySelectedWordbox].GetChild(0).GetComponent<TextMeshProUGUI>().text =
                 "";
         }
-        AnimateWordBox(wordBoxes[currentlySelectedWordbox]);
-    }
-
-    public void RemoveReverseLetterFromWordBox()
-    {
-        // If the text in the current wordbox is empty, go back a step and clear the one
-        // that comes after
-        if (reverseWordBoxes[currentWordBox].GetChild(0).GetComponent<TextMeshProUGUI>().text == "")
-        {
-            if (currentWordBox > 0)
-            {
-                // Step back
-                currentWordBox--;
-            }
-
-            reverseWordBoxes[currentWordBox].GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
-        }
-        else
-        {
-            // If it wasn't empty, we clear the one selected instead
-            reverseWordBoxes[currentWordBox].GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
-        }
-        AnimateWordBox(reverseWordBoxes[currentWordBox]);
+        AnimateWordBoxAsync(wordBoxes[currentlySelectedWordbox], token.Token);
     }
 
     public void addUsedLetter(char usedLetter)
@@ -803,7 +353,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    async UniTaskVoid CheckWord(string guess)
+    async UniTaskVoid CheckWordAsync(string guess, CancellationToken cancellationToken)
     {
         // Set up variables
         index = 0;
@@ -811,6 +361,7 @@ public class GameController : MonoBehaviour
         string tempPlayerGuess = guess;
         char[] correctWordArray = correctWord.ToCharArray();
         string tempCorrectWord = correctWord;
+        var token = new CancellationTokenSource();
 
         // Swap correct characters with '0'
         for (int i = 0; i < 5; i++)
@@ -1002,7 +553,7 @@ public class GameController : MonoBehaviour
 
         if (guess == correctWord)
         {
-            ShowPopup("Поздравляем, это правильное слово!", true);
+            ShowPopupAsync("Поздравляем, это правильное слово!", token.Token, true);
             Debug.Log("Correct word!");
         }
         else
@@ -1014,11 +565,19 @@ public class GameController : MonoBehaviour
 
         if (currentRow > amountOfRows)
         {
-            ShowPopup("Повезёт в следующий раз :(\n" + "Правильное слово: " + correctWord, true);
+            ShowPopupAsync(
+                "Повезёт в следующий раз :(\n" + "Правильное слово: " + correctWord,
+                token.Token,
+                true
+            );
         }
     }
 
-    async UniTaskVoid ShowPopup(string message, bool stayForever = false)
+    async UniTaskVoid ShowPopupAsync(
+        string message,
+        CancellationToken cancellationToken,
+        bool stayForever = false
+    )
     {
         // Set the message of the popup
         popup.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message;
@@ -1042,7 +601,10 @@ public class GameController : MonoBehaviour
         canvasGr.DOFade(0, 0.5f);
     }
 
-    async UniTaskVoid AnimateWordBox(Transform wordboxToAnimate)
+    async UniTaskVoid AnimateWordBoxAsync(
+        Transform wordboxToAnimate,
+        CancellationToken cancellationToken
+    )
     {
         // Duration of the animation 0.15f
         float duration = 0.15f;

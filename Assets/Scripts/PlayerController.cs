@@ -72,6 +72,7 @@ public class PlayerController : MonoBehaviour
     void ClickCharacter(string letter)
     {
         // add the letters to the wordboxes.
+
         gameController.AddLetterToWordBox(letter);
     }
 

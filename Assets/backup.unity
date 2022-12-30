@@ -4614,7 +4614,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: GameGuessWordBoxPressed
         m_Mode: 3
@@ -6129,7 +6129,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: StartGameGuess
         m_Mode: 1
@@ -7588,7 +7588,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: CorrectButton
         m_Mode: 1
@@ -7772,7 +7772,7 @@ PrefabInstance:
     - target: {fileID: 7510675735989403957, guid: 17b1765f2f804d24da8290e5c6dfd2d6, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1991116172}
+      objectReference: {fileID: 1991116174}
     - target: {fileID: 7510675735989403957, guid: 17b1765f2f804d24da8290e5c6dfd2d6, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -9476,7 +9476,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: ShowHelpWord
         m_Mode: 1
@@ -13139,7 +13139,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: SubmitReverseWord
         m_Mode: 1
@@ -13562,7 +13562,7 @@ MonoBehaviour:
   - {fileID: 1536981377}
   - {fileID: 986808342}
   - {fileID: 870294505}
-  gameController: {fileID: 1991116172}
+  gameController: {fileID: 1991116174}
 --- !u!4 &1368704350
 Transform:
   m_ObjectHideFlags: 0
@@ -13973,7 +13973,7 @@ PrefabInstance:
     - target: {fileID: 7510675735989403957, guid: 17b1765f2f804d24da8290e5c6dfd2d6, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1991116172}
+      objectReference: {fileID: 1991116174}
     - target: {fileID: 7510675735989403957, guid: 17b1765f2f804d24da8290e5c6dfd2d6, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -15178,7 +15178,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: StartClassic
         m_Mode: 1
@@ -16397,7 +16397,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: ShowMasterWord
         m_Mode: 1
@@ -16942,7 +16942,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: GameGuessWordBoxPressed
         m_Mode: 3
@@ -19142,7 +19142,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: StartReverse
         m_Mode: 1
@@ -20285,7 +20285,7 @@ PrefabInstance:
     - target: {fileID: 7510675735989403957, guid: 17b1765f2f804d24da8290e5c6dfd2d6, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1991116172}
+      objectReference: {fileID: 1991116174}
     - target: {fileID: 7510675735989403957, guid: 17b1765f2f804d24da8290e5c6dfd2d6, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -20387,7 +20387,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: IncorrectPlaceButton
         m_Mode: 1
@@ -20520,7 +20520,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: BannedButton
         m_Mode: 1
@@ -20664,7 +20664,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: SubmitGameGuessWord
         m_Mode: 1
@@ -20944,7 +20944,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: GameGuessWordBoxPressed
         m_Mode: 3
@@ -20965,7 +20965,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1991116173}
-  - component: {fileID: 1991116172}
+  - component: {fileID: 1991116174}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -20973,7 +20973,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1991116172
+--- !u!4 &1991116173
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991116171}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 278.0678, y: 227.2526, z: -3.6172223}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1991116174
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20982,47 +20997,47 @@ MonoBehaviour:
   m_GameObject: {fileID: 1991116171}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cac810282a929894892331cd251d393a, type: 3}
+  m_Script: {fileID: 11500000, guid: 5517891cd9bfd67429310bee2165c1b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   wordBoxInteractionCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0.0006369427
-      value: 0
-      inSlope: -4.4666424
-      outSlope: -4.4666424
-      tangentMode: 0
+      time: -0.00063705444
+      value: 0.04027939
+      inSlope: 4.3016777
+      outSlope: 4.3016777
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.042573735
+      outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.28471336
-      value: 0.961111
-      inSlope: 1.0198054
-      outSlope: 1.0198054
+      time: 0.1866242
+      value: 0.8458169
+      inSlope: 1.651012
+      outSlope: 1.651012
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: -0.043610882
-      outSlope: -0.043610882
-      tangentMode: 0
+      time: 0.99938965
+      value: 0.033332825
+      inSlope: -0.99965376
+      outSlope: -0.99965376
+      tangentMode: 34
       weightedMode: 0
-      inWeight: 0.044523828
+      inWeight: 0.33333334
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   popup: {fileID: 741576688}
-  textFile: {fileID: 0}
+  textFile: {fileID: 4900000, guid: 399a425400e5a3e4b9a30f313fc55645, type: 3}
   canvasGr: {fileID: 741576692}
   chooseColor: {fileID: 661729335}
-  masterHelper: {fileID: 0}
+  masterHelper: {fileID: 1550068167}
   menu: {fileID: 1841198256}
   enterMenu: {fileID: 151805639}
   classicalUI: {fileID: 1090967895}
@@ -21030,9 +21045,13 @@ MonoBehaviour:
   wordBoxesUI: {fileID: 1018712392}
   gameGuessUI: {fileID: 1677751902}
   chooseColorObject: {fileID: 661729333}
+  currentWord: 
+  classic: 1
   clearedWordBoxSprite: {fileID: 21300000, guid: 4417228033a2bb44d92171eeb2766db7, type: 3}
   defaultSprite: {fileID: 21300000, guid: d8bcb5eccc63c22419e3248090ccbb6c, type: 3}
   playerController: {fileID: 1368704349}
+  dictionary: []
+  guessingWords: []
   correctWord: 
   wordBoxes:
   - {fileID: 1297532291}
@@ -21078,21 +21097,6 @@ MonoBehaviour:
   - {fileID: 324877851}
   - {fileID: 1449926005}
   index: 0
---- !u!4 &1991116173
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1991116171}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 278.0678, y: 227.2526, z: -3.6172223}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &1993859056 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5717475350439460037, guid: 17b1765f2f804d24da8290e5c6dfd2d6, type: 3}
@@ -21419,7 +21423,7 @@ PrefabInstance:
     - target: {fileID: 7510675735989403957, guid: 17b1765f2f804d24da8290e5c6dfd2d6, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1991116172}
+      objectReference: {fileID: 0}
     - target: {fileID: 7510675735989403957, guid: 17b1765f2f804d24da8290e5c6dfd2d6, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -21760,7 +21764,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: GameGuessWordBoxPressed
         m_Mode: 3
@@ -22043,7 +22047,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1991116172}
+      - m_Target: {fileID: 1991116174}
         m_TargetAssemblyTypeName: GameController, Assembly-CSharp
         m_MethodName: GameGuessWordBoxPressed
         m_Mode: 3
